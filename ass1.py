@@ -6,17 +6,17 @@ class Mathtools:
         self.total_calls+=1
         return ((f(x+h)-f(x-h))/(2*h))
     
-    def gradient(self,f,v,val,h=0.00001): #here v is variable and val is the variable's value
+    def gradient(self,f,variables,values,h=0.00001): 
         self.total_calls+=1
         gradients={}
-        for var in v:
-            index = v.index(var)
-            val_plus = val.copy()
-            val_minus = val.copy()
-            val_plus[index] += h
-            val_minus[index] -= h
-            grd_i = (f(*val_plus) - f(*val_minus)) / (2 * h)
-            gradients[var] = grd_i
+        for variable in variables: # for each x, y, z
+            index = variables.index(variable) # get the index e.g. 0 -> x, 1 -> y, 2 -> z
+            val1 = values.copy() 
+            val2 = values.copy()
+            val1[index] += h # copies the values list and change only one value of the variable by h
+            val2[index] -=h  
+            grd_index = (f(*val1) - f(*val2)) / (2*h) # This is equivalent to f(1+h, 2, 3) - f(1-h, 2, 3) / 2h
+            gradients[variable] = grd_index
         return gradients
 
 #now lets define a function as an example

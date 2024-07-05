@@ -16,7 +16,7 @@ class Linear_Regression_Batch:
         if self.batch_size is None:
             self.batch_size = X.shape[0]        # Keeping the batch size as the no. of rows in X
         
-        self.weights = np.zeros((X.shape[1],1)) # The weights being the 2-D array of 1 row and no. of columns of X
+        self.weights = np.zeros((X.shape[1],1)) # The weights being the 2-D array of no.of rows as X and one column
         prev_weights = self.weights
 
         self.error_list = []                    # The errors stay in this list later on
@@ -76,12 +76,12 @@ def create_bt(X, y, batch_size):
     batches =[]
     data = np.hstack((X, y))      # Combinin them
     np.random.shuffle(data)       # and then shuffle em yo
-    no_bt = data.shape[0] // batch_size
+    no_of_bt = data.shape[0] // batch_size
     
-    for i in range(no_bt+1):
-        if i < no_bt:
+    for i in range(no_of_bt+1):
+        if i < no_of_bt:
             batch = data[i * batch_size:(i + 1) * batch_size, :]         # Full batch.
-        elif data.shape[0] % batch_size != 0 and i == no_bt:
+        elif data.shape[0] % batch_size != 0 and i == no_of_bt:
             batch = data[i * batch_size:data.shape[0]]                   # Last batch with remaining data.
         
         X_batch = batch[:, :-1]

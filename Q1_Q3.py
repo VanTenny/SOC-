@@ -36,7 +36,7 @@ def error_calculation(Y1, Y):
 
 def TF(X, mu, s):
     # Calculate the radial basis function
-    RBF = np.exp(-np.sum((X[:, 1:] - mu) ** 2, axis=1, keepdims=True) / (2 * s ** 2))
+    RBF = np.exp(-np.sum((X[:, 1:] - mu) ** 2, axis=1, keepdims=True) / (2 * (s ** 2)))
     X_TF = np.hstack((X, RBF))
     return X_TF
 

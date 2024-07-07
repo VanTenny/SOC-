@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd 
 import seaborn as sns
+import os
 
 np.random.seed(42)
 
@@ -60,8 +61,10 @@ def visualize(df, task, theta):
         y_min, y_max = df['X2'].min() - 1, df['X2'].max() + 1
         xx, yy = np.meshgrid(np.linspace(x_min, x_max, 100), np.linspace(y_min, y_max, 100))
         
-        if task == 1 or task == 2:
+        if task == 1:
             Z = model.sigmoid(np.c_[np.ones((xx.ravel().shape[0], 1)), xx.ravel(), yy.ravel()].dot(theta))
+        elif task == 2:
+            Z = model.sigmoid(np.c_[np.ones((xx.ravel().shape[0], 1)), xx.ravel(), yy.ravel(), (xx.ravel() * yy.ravel())].dot(theta))
         else:
             out = vectorized_map(xx.ravel(), yy.ravel())
             Z = model.sigmoid(out.dot(theta))
@@ -132,7 +135,9 @@ def task_3():
     print('Theta found by gradient descent:\n', theta)
     visualize(df, 3, theta)                                                  # Plot the decision boundary on the data points
 
-if __name__=='__main__':
+if __name__ == '__main__':
+    # Change the working directory to the location of your script
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
     
     # Uncomment the line below to run task 1
     task_1()

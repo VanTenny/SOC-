@@ -5,53 +5,54 @@ import seaborn as sns
 
 np.random.seed(42)
 
-class Logistic_regression:
-    def __init__(self, learnin_rate = 0.01, epochs = 1000, lamb_val = 0):
-        self.epochs =  epochs
-        self.learnin_rate = learnin_rate
-        self.lamb_val = lamb_val
+class LogisticRegression:
+    def __init__(self, learning_rate=0.01, epochs=1000, lambda_value=0):
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.lambda_value = lambda_value
     
     def sigmoid(self, z):
-        z=np.array(z)                                                        # this ensures that numpy is an array
-        return 1/(1 + np.exp(-z))
+        z = np.array(z)                                                        # This ensures that z is a numpy array
+        return 1 / (1 + np.exp(-z))
     
-    def grad_func(self, X, y, n, theta):
-        h = self.sigmoid(np.dot(X, theta))                                   # gives the hypothesis
-        L = (-1/n) * (np.dot(y.T, np.log(h)) + np.dot(1 - y, np.log(1 - h))) # calculatin the loss
+    def grad_func(self, X, y, theta):
+        n = len(y)
+        h = self.sigmoid(np.dot(X, theta))                                   # Calculate the hypothesis
+        L = (-1 / n) * (np.dot(y.T, np.log(h)) + np.dot((1 - y).T, np.log(1 - h))) # Calculate the loss
 
-        if self.lamb_val > 0:
-            L += (self.lamb_val / (2 * n)) * np.sum(np.square(theta[1:]))    # adding the regularisation term 
+        if self.lambda_value > 0:
+            L += (self.lambda_value / (2 * n)) * np.sum(np.square(theta[1:]))    # Add the regularization term 
         
-        grad = (1/n) * np.dot(X.T, (h - y))                                  # calculates the grad
-        if self.lamb_val > 0:
-            grad[1 : ] += (self.lamb_val / n) * theta[1 : ]
+        grad = (1 / n) * np.dot(X.T, (h - y))                                  # Calculate the gradient
+        if self.lambda_value > 0:
+            grad[1:] += (self.lambda_value / n) * theta[1:]
         
-        return L, grad                                                       # gives the loss and gradient back
+        return L, grad                                                       # Return the loss and gradient
     
-    def grad_descent(self, X, y, n, theta):
+    def grad_descent(self, X, y, theta):
         for epoch in range(self.epochs):
-            L, grad = self.grad_func(X, y, n, theta)                         # gets the data for every epoch
-            theta -= grad * self.learnin_rate                                # updates the theta value every time
-            if epoch % 100 == 0:                                             # prints the epoch for 100th one  
-                print(f"For the {epoch}, the loss is {L[0],[0]}")
-            return theta
+            L, grad = self.grad_func(X, y, theta)                         # Calculate loss and gradient for each epoch
+            theta -= grad * self.learning_rate                                # Update theta values
+            if epoch % 100 == 0:                                              # Print the loss every 100 epochs
+                print(f"Epoch {epoch}: Loss = {L[0][0]}")
+        return theta
 
 def vectorized_map(X1, X2):
     degree = 6
-    out = np.ones(X1.shape[0])[:, np.newaxis]
+    out = np.ones((X1.shape[0], 1))
     for i in range(1, degree + 1):
         for j in range(i + 1):
             out = np.hstack((out, (X1 ** (i - j) * X2 ** j)[:, np.newaxis]))
-    return out                                                                # return the new feature matrix
+    return out                                                                # Return the new feature matrix
 
 def load_data(file):
-    df = pd.read_csv(file, sep= ",", header = None)
+    df = pd.read_csv(file, sep=",", header=None)
     df.columns = ["X1", "X2", "label"]
-    return df                                                                 # returns the data frame
+    return df                                                                 # Return the data frame
     
 def visualize(df, task, theta):
-    plt.figure(fig_size=(7,5))
-    ax = sns.scatterplot(x = "X1", y = "X2", hue = "label", data = df, style = "label", s =80)
+    plt.figure(figsize=(7, 5))
+    ax = sns.scatterplot(x="X1", y="X2", hue="label", data=df, style="label", s=80)
     plt.title("Scatter plot of the training data")
 
     if theta is not None:                                                     # Plot decision boundary if theta is provided
@@ -73,44 +74,46 @@ def visualize(df, task, theta):
     print("Data plot with decision boundary saved at: ", path)
 
 def task_1():
-    learnin_rate = 0.001
+    learning_rate = 0.001
     epochs = 1000
 
     file = "task1_data.csv"
     df = load_data(file)
 
-    n = len(df)                                                  # no of training examples
-    X = np.hstack((np.ones((n, 1)), df[['X1', 'X2']].values))    # Add bias term to X
+    m = len(df)                                                  # Number of training examples
+    X = np.hstack((np.ones((m, 1)), df[['X1', 'X2']].values))    # Add bias term to X
     y = np.array(df.label.values).reshape(-1, 1)                 # Convert y to column vector
     initial_theta = np.zeros(shape=(X.shape[1], 1))              # Initialize theta to zeros
 
-    model = Logistic_regression(epochs, learnin_rate)            # Initialize model
-    theta = model.grad_descent(X, y, initial_theta, m)           # Perform gradient descent
+    global model
+    model = LogisticRegression(learning_rate=learning_rate, epochs=epochs)  # Initialize model
+    theta = model.grad_descent(X, y, initial_theta)                         # Perform gradient descent
 
     print('Theta found by gradient descent:\n', theta)
-    visualize(df, 1, theta)                                      # Plot the decision boundary on the data points
+    visualize(df, 1, theta)                                                 # Plot the decision boundary on the data points
 
 def task_2():
-    learnin_rate = 0.001
+    learning_rate = 0.001
     epochs = 1000
 
     file = "task2_data.csv"
     df = load_data(file)
 
     df["X1X2"] = df["X1"] * df["X2"]  
-    n = len(df)
-    X = np.hstack((np.ones((n, 1)), df[['X1', 'X2', 'X1X2']].values))        # Create X with new feature
-    y = np.array(df.label.values).reshape(-1, 1)                             # Convert y to column vector
-    initial_theta = np.zeros(shape=(X.shape[1], 1))                          # Initialize theta to zeros
+    m = len(df)
+    X = np.hstack((np.ones((m, 1)), df[['X1', 'X2', 'X1X2']].values))       # Create X with new feature
+    y = np.array(df.label.values).reshape(-1, 1)                            # Convert y to column vector
+    initial_theta = np.zeros(shape=(X.shape[1], 1))                         # Initialize theta to zeros
 
-    model = Logistic_regression(epochs, learnin_rate)                        # Initialize model
-    theta = model.gradient_descent(X, y, initial_theta, m)                   # Perform gradient descent
+    global model
+    model = LogisticRegression(learning_rate=learning_rate, epochs=epochs)  # Initialize model
+    theta = model.grad_descent(X, y, initial_theta)                         # Perform gradient descent
 
     print('Theta found by gradient descent:\n', theta)
-    visualize(df, 2, theta)                                                  # Plot the decision boundary on the data points
+    visualize(df, 2, theta)                                                 # Plot the decision boundary on the data points
 
 def task_3():
-    learnin_rate = 0.01
+    learning_rate = 0.01
     epochs = 1000
     lambda_value = 0
 
@@ -122,8 +125,9 @@ def task_3():
     y = np.array(df.label.values).reshape(-1, 1)                             # Convert y to column vector
     initial_theta = np.zeros(shape=(X.shape[1], 1))                          # Initialize theta to zeros
 
-    model = Logistic_regression(epochs, learnin_rate, lambda_value)          # Initialize model
-    theta = model.grad_descent(X, y, initial_theta, m)                       # Perform gradient descent
+    global model
+    model = LogisticRegression(learning_rate=learning_rate, epochs=epochs, lambda_value=lambda_value)  # Initialize model
+    theta = model.grad_descent(X, y, initial_theta)                         # Perform gradient descent
 
     print('Theta found by gradient descent:\n', theta)
     visualize(df, 3, theta)                                                  # Plot the decision boundary on the data points
